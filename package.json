@@ -1,0 +1,99 @@
+{
+  "name": "fsftp",
+  "version": "0.0.0",
+  "description": "quickly compress and dowload / upload files",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Jason Gallavin",
+    "email": "jasongallavin@gmail.com"
+  },
+  "dependencies": {
+    "@types/node": "*"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.6",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "husky": "^1.1.1",
+    "lint-staged": "^7.3.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.0.1",
+    "prettier": "^1.14.3",
+    "standard-version": "^4.4.0",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.1.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf build reports",
+    "test": "mocha --require tests/entry 'tests/**/*.{test,spec}.ts'",
+    "test:xunit": "yarn test --reporter xunit --reporter-options output=reports/test-results.xml || exit 0",
+    "cover": "nyc yarn test",
+    "cover:xunit": "nyc yarn test:xunit",
+    "lint": "tslint '{src,tests}/**/*.{js,ts}'",
+    "lint:checkstyle": "mkdir -p reports && yarn lint --format checkstyle --out reports/lint-checkstyle.xml --force",
+    "lint:format": "prettier --write '{src,tests}/**/*.{js,ts}' && yarn lint --fix",
+    "npm:package": "scripts/npm-build && npm pack build && rm -rf build",
+    "health": "yarn && yarn clean && yarn lint && yarn build --noEmit && yarn test --reporter dot",
+    "ci": "yarn && yarn lint:checkstyle && && yarn build --noEmit && yarn cover:xunit",
+    "release": "standard-version"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "post-commit": "git update-index --again"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "{src,test}/**/*.{js,ts}": [
+        "npx tslint --fix",
+        "npx prettier --write",
+        "git add"
+      ],
+      "*.{md,json}": [
+        "npx prettier --write",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "package.json",
+      "tsconfig.json"
+    ]
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "build/**",
+      "tests/**",
+      "node_modules/**"
+    ],
+    "reporter": [
+      "clover",
+      "cobertura",
+      "html",
+      "json",
+      "lcov",
+      "text",
+      "text-summary"
+    ],
+    "clean": true,
+    "tempDirectory": "reports/.nyc_ouptut",
+    "reportDir": "reports/coverage",
+    "all": true
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 140,
+    "tabWidth": 2
+  }
+}
